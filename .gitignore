@@ -1,0 +1,9 @@
+# env (never commit)
+.env
+
+# dependencies
+node_modules/
+
+# logs
+*.log
+
