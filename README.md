@@ -1,1 +1,2 @@
-# sms-elevanda-client
+# SMS Elevanda – Client (Parent/Student Portal)
+
