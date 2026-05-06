@@ -4,8 +4,12 @@ import Card from "../components/ui/Card.jsx";
 import Button from "../components/ui/Button.jsx";
 import Table from "../components/ui/Table.jsx";
 import { api } from "../services/api.js";
+import { useClientContextStore } from "../store/clientContextStore.js";
+import { withStudentId } from "../utils/studentQuery.js";
 
 export default function GradesPage() {
+  const selectedStudentId = useClientContextStore((s) => s.selectedStudentId);
+
   const [grades, setGrades] = useState([]);
   const [loading, setLoading] = useState(true);
   const [pageError, setPageError] = useState("");
@@ -15,7 +19,7 @@ export default function GradesPage() {
     setLoading(true);
     setPageError("");
     try {
-      const res = await api.get("/api/client/grades");
+      const res = await api.get(withStudentId("/api/client/grades", selectedStudentId));
       setGrades(res.data?.data?.items ?? []);
     } catch (err) {
       setPageError(err?.response?.data?.message || "Failed to load grades");
@@ -26,7 +30,7 @@ export default function GradesPage() {
 
   useEffect(() => {
     loadGrades();
-  }, []);
+  }, [selectedStudentId]);
 
   const terms = useMemo(() => {
     const all = Array.from(new Set(grades.map((g) => g.term).filter(Boolean)));

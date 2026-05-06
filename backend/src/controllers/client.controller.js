@@ -16,31 +16,54 @@ export const withdrawSchema = z.object({
   note: z.string().max(200).optional(),
 });
 
+function getStudentIdFromQuery(req) {
+  const value = req.query?.studentId;
+  if (typeof value === "string" && value.trim().length > 0) return value.trim();
+  return undefined;
+}
+
 export const getProfile = asyncHandler(async (req, res) => {
-  const { student, isParent } = await getClientStudent({ userId: req.user.sub, role: req.user.role });
+  const { student, isParent, parent } = await getClientStudent({
+    userId: req.user.sub,
+    role: req.user.role,
+    studentId: getStudentIdFromQuery(req),
+  });
   return ok(res, "Profile", {
     auth: req.user,
     isParent,
+    parent,
     student,
   });
 });
 
 export const feeBalance = asyncHandler(async (req, res) => {
-  const { student } = await getClientStudent({ userId: req.user.sub, role: req.user.role });
+  const { student } = await getClientStudent({
+    userId: req.user.sub,
+    role: req.user.role,
+    studentId: getStudentIdFromQuery(req),
+  });
   if (!student) return ok(res, "Fee balance", { balance: 0 });
   const balance = await getFeeBalance(student.id);
   return ok(res, "Fee balance", { balance });
 });
 
 export const feeHistory = asyncHandler(async (req, res) => {
-  const { student } = await getClientStudent({ userId: req.user.sub, role: req.user.role });
+  const { student } = await getClientStudent({
+    userId: req.user.sub,
+    role: req.user.role,
+    studentId: getStudentIdFromQuery(req),
+  });
   if (!student) return ok(res, "Fee history", { items: [] });
   const items = await getFeeHistory(student.id);
   return ok(res, "Fee history", { items });
 });
 
 export const feeDeposit = asyncHandler(async (req, res) => {
-  const { student } = await getClientStudent({ userId: req.user.sub, role: req.user.role });
+  const { student } = await getClientStudent({
+    userId: req.user.sub,
+    role: req.user.role,
+    studentId: getStudentIdFromQuery(req),
+  });
   if (!student) {
     const err = new Error("Student not found for this account");
     err.status = 400;
@@ -51,7 +74,11 @@ export const feeDeposit = asyncHandler(async (req, res) => {
 });
 
 export const feeWithdraw = asyncHandler(async (req, res) => {
-  const { student } = await getClientStudent({ userId: req.user.sub, role: req.user.role });
+  const { student } = await getClientStudent({
+    userId: req.user.sub,
+    role: req.user.role,
+    studentId: getStudentIdFromQuery(req),
+  });
   if (!student) {
     const err = new Error("Student not found for this account");
     err.status = 400;
@@ -62,19 +89,31 @@ export const feeWithdraw = asyncHandler(async (req, res) => {
 });
 
 export const grades = asyncHandler(async (req, res) => {
-  const { student } = await getClientStudent({ userId: req.user.sub, role: req.user.role });
+  const { student } = await getClientStudent({
+    userId: req.user.sub,
+    role: req.user.role,
+    studentId: getStudentIdFromQuery(req),
+  });
   const items = student ? await getGrades(student.id) : [];
   return ok(res, "Grades", { items });
 });
 
 export const attendance = asyncHandler(async (req, res) => {
-  const { student } = await getClientStudent({ userId: req.user.sub, role: req.user.role });
+  const { student } = await getClientStudent({
+    userId: req.user.sub,
+    role: req.user.role,
+    studentId: getStudentIdFromQuery(req),
+  });
   const items = student ? await getAttendance(student.id) : [];
   return ok(res, "Attendance", { items });
 });
 
 export const timetable = asyncHandler(async (req, res) => {
-  const { student } = await getClientStudent({ userId: req.user.sub, role: req.user.role });
+  const { student } = await getClientStudent({
+    userId: req.user.sub,
+    role: req.user.role,
+    studentId: getStudentIdFromQuery(req),
+  });
   const items = student ? await getTimetable(student.id) : [];
   return ok(res, "Timetable", { items });
 });

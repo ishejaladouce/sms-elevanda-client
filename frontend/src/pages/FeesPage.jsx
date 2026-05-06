@@ -10,6 +10,8 @@ import Input from "../components/ui/Input.jsx";
 import Badge from "../components/ui/Badge.jsx";
 import Table from "../components/ui/Table.jsx";
 import { api } from "../services/api.js";
+import { useClientContextStore } from "../store/clientContextStore.js";
+import { withStudentId } from "../utils/studentQuery.js";
 
 const moneySchema = z.object({
   amount: z.coerce.number().int().positive(),
@@ -25,6 +27,8 @@ function formatDate(value) {
 }
 
 export default function FeesPage() {
+  const selectedStudentId = useClientContextStore((s) => s.selectedStudentId);
+
   const [balance, setBalance] = useState(0);
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -45,8 +49,8 @@ export default function FeesPage() {
     setPageError("");
     try {
       const [balRes, histRes] = await Promise.all([
-        api.get("/api/client/fees/balance"),
-        api.get("/api/client/fees/history"),
+        api.get(withStudentId("/api/client/fees/balance", selectedStudentId)),
+        api.get(withStudentId("/api/client/fees/history", selectedStudentId)),
       ]);
 
       setBalance(balRes.data?.data?.balance ?? 0);
@@ -60,7 +64,7 @@ export default function FeesPage() {
 
   useEffect(() => {
     loadFees();
-  }, []);
+  }, [selectedStudentId]);
 
   const columns = useMemo(
     () => [
@@ -88,7 +92,7 @@ export default function FeesPage() {
   async function submitDeposit(values) {
     try {
       depositForm.clearErrors("root");
-      await api.post("/api/client/fees/deposit", values);
+      await api.post(withStudentId("/api/client/fees/deposit", selectedStudentId), values);
       depositForm.reset();
       await loadFees();
     } catch (err) {
@@ -100,7 +104,7 @@ export default function FeesPage() {
   async function submitWithdraw(values) {
     try {
       withdrawForm.clearErrors("root");
-      await api.post("/api/client/fees/withdraw", values);
+      await api.post(withStudentId("/api/client/fees/withdraw", selectedStudentId), values);
       withdrawForm.reset();
       await loadFees();
     } catch (err) {

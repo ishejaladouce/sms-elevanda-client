@@ -4,6 +4,8 @@ import Card from "../components/ui/Card.jsx";
 import Badge from "../components/ui/Badge.jsx";
 import Table from "../components/ui/Table.jsx";
 import { api } from "../services/api.js";
+import { useClientContextStore } from "../store/clientContextStore.js";
+import { withStudentId } from "../utils/studentQuery.js";
 
 const LOW_BALANCE_LIMIT = 5000;
 
@@ -23,12 +25,17 @@ function statusBadge(status) {
 }
 
 export default function DashboardPage() {
+  const selectedStudentId = useClientContextStore((s) => s.selectedStudentId);
+  const setSelectedStudentId = useClientContextStore((s) => s.setSelectedStudentId);
+
   const [balance, setBalance] = useState(null);
   const [recentPayments, setRecentPayments] = useState([]);
   const [latestGrades, setLatestGrades] = useState([]);
   const [attendanceItems, setAttendanceItems] = useState([]);
   const [todayLessons, setTodayLessons] = useState([]);
   const [pageError, setPageError] = useState("");
+  const [isParent, setIsParent] = useState(false);
+  const [children, setChildren] = useState([]);
 
   useEffect(() => {
     let alive = true;
@@ -36,15 +43,21 @@ export default function DashboardPage() {
       try {
         setPageError("");
         const today = new Date().getDay();
-        const [balRes, histRes, gradesRes, attRes, ttRes] = await Promise.all([
-          api.get("/api/client/fees/balance"),
-          api.get("/api/client/fees/history"),
-          api.get("/api/client/grades"),
-          api.get("/api/client/attendance"),
-          api.get("/api/client/timetable"),
+        const [profileRes, balRes, histRes, gradesRes, attRes, ttRes] = await Promise.all([
+          api.get(withStudentId("/api/client/profile", selectedStudentId)),
+          api.get(withStudentId("/api/client/fees/balance", selectedStudentId)),
+          api.get(withStudentId("/api/client/fees/history", selectedStudentId)),
+          api.get(withStudentId("/api/client/grades", selectedStudentId)),
+          api.get(withStudentId("/api/client/attendance", selectedStudentId)),
+          api.get(withStudentId("/api/client/timetable", selectedStudentId)),
         ]);
 
         if (!alive) return;
+        setIsParent(Boolean(profileRes.data?.data?.isParent));
+        setChildren(profileRes.data?.data?.parent?.children ?? []);
+        const pickedStudentId = profileRes.data?.data?.student?.id || "";
+        if (!selectedStudentId && pickedStudentId) setSelectedStudentId(pickedStudentId);
+
         setBalance(balRes.data?.data?.balance ?? 0);
         setRecentPayments((histRes.data?.data?.items ?? []).slice(0, 5));
         setLatestGrades((gradesRes.data?.data?.items ?? []).slice(0, 6));
@@ -59,7 +72,7 @@ export default function DashboardPage() {
     return () => {
       alive = false;
     };
-  }, []);
+  }, [selectedStudentId, setSelectedStudentId]);
 
   const low = typeof balance === "number" && balance < LOW_BALANCE_LIMIT;
 
@@ -105,6 +118,23 @@ export default function DashboardPage() {
         <p className="text-muted mt-1">Quick overview</p>
 
         {pageError ? <div className="mt-4 text-danger text-sm">{pageError}</div> : null}
+
+        {isParent && children.length > 0 ? (
+          <div className="mt-4 rounded-card border border-border bg-surface shadow-soft p-4">
+            <div className="text-sm text-muted">Selected child</div>
+            <select
+              className="mt-2 w-full md:max-w-md rounded-control border border-border bg-surface2 px-3 py-2 outline-none focus:ring-2 focus:ring-accent/40 transition duration-200 ease-smooth"
+              value={selectedStudentId || ""}
+              onChange={(e) => setSelectedStudentId(e.target.value)}
+            >
+              {children.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.user?.name || c.admissionNumber || c.id}
+                </option>
+              ))}
+            </select>
+          </div>
+        ) : null}
 
         <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <Card title="Fee balance">

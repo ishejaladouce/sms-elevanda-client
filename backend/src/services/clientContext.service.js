@@ -11,7 +11,7 @@ const userSafeSelect = {
 };
 
 // Finds the student record the client is allowed to view.
-export async function getClientStudent({ userId, role }) {
+export async function getClientStudent({ userId, role, studentId }) {
   if (role === "STUDENT") {
     const student = await prisma.student.findUnique({
       where: { userId },
@@ -21,7 +21,7 @@ export async function getClientStudent({ userId, role }) {
         parent: { include: { user: { select: userSafeSelect } } },
       },
     });
-    return { student, isParent: false };
+    return { student, isParent: false, parent: null };
   }
 
   if (role === "PARENT") {
@@ -33,10 +33,13 @@ export async function getClientStudent({ userId, role }) {
       },
     });
 
-    const student = parent?.children?.[0] || null;
-    return { student, isParent: true };
+    const children = parent?.children ?? [];
+    const selected =
+      (studentId ? children.find((c) => c.id === studentId) : null) || children[0] || null;
+
+    return { student: selected, isParent: true, parent: parent ? { ...parent, children } : null };
   }
 
-  return { student: null, isParent: false };
+  return { student: null, isParent: false, parent: null };
 }
 

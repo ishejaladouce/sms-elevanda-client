@@ -4,10 +4,14 @@ import Button from "../components/ui/Button.jsx";
 import Card from "../components/ui/Card.jsx";
 import Table from "../components/ui/Table.jsx";
 import { api } from "../services/api.js";
+import { useClientContextStore } from "../store/clientContextStore.js";
+import { withStudentId } from "../utils/studentQuery.js";
 
 const dayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 export default function TimetablePage() {
+  const selectedStudentId = useClientContextStore((s) => s.selectedStudentId);
+
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [pageError, setPageError] = useState("");
@@ -16,7 +20,7 @@ export default function TimetablePage() {
     setLoading(true);
     setPageError("");
     try {
-      const res = await api.get("/api/client/timetable");
+      const res = await api.get(withStudentId("/api/client/timetable", selectedStudentId));
       setItems(res.data?.data?.items ?? []);
     } catch (err) {
       setPageError(err?.response?.data?.message || "Failed to load timetable");
@@ -27,7 +31,7 @@ export default function TimetablePage() {
 
   useEffect(() => {
     loadTimetable();
-  }, []);
+  }, [selectedStudentId]);
 
   const today = new Date().getDay();
   const todayItems = useMemo(() => items.filter((i) => i.dayOfWeek === today), [items, today]);

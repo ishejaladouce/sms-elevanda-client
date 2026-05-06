@@ -5,6 +5,8 @@ import Card from "../components/ui/Card.jsx";
 import Badge from "../components/ui/Badge.jsx";
 import Table from "../components/ui/Table.jsx";
 import { api } from "../services/api.js";
+import { useClientContextStore } from "../store/clientContextStore.js";
+import { withStudentId } from "../utils/studentQuery.js";
 
 function formatDate(value) {
   try {
@@ -22,6 +24,8 @@ function statusBadge(status) {
 }
 
 export default function AttendancePage() {
+  const selectedStudentId = useClientContextStore((s) => s.selectedStudentId);
+
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [pageError, setPageError] = useState("");
@@ -30,7 +34,7 @@ export default function AttendancePage() {
     setLoading(true);
     setPageError("");
     try {
-      const res = await api.get("/api/client/attendance");
+      const res = await api.get(withStudentId("/api/client/attendance", selectedStudentId));
       setItems(res.data?.data?.items ?? []);
     } catch (err) {
       setPageError(err?.response?.data?.message || "Failed to load attendance");
@@ -41,7 +45,7 @@ export default function AttendancePage() {
 
   useEffect(() => {
     loadAttendance();
-  }, []);
+  }, [selectedStudentId]);
 
   const summary = useMemo(() => {
     const counts = { PRESENT: 0, ABSENT: 0, LATE: 0 };
