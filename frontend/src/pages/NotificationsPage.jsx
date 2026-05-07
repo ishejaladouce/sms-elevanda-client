@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import Button from "../components/ui/Button.jsx";
 import Card from "../components/ui/Card.jsx";
 import Badge from "../components/ui/Badge.jsx";
+import PageHeader from "../components/layout/PageHeader.jsx";
 import { api } from "../services/api.js";
 
 function formatDateTime(value) {
@@ -38,40 +39,47 @@ export default function NotificationsPage() {
   const unreadCount = useMemo(() => items.filter((n) => !n.isRead).length, [items]);
 
   return (
-    <div className="min-h-screen p-4 md:p-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <h1 className="font-display text-3xl">Notifications</h1>
-            <p className="text-muted mt-1">
-              {loading ? "Loading..." : `${unreadCount} unread`}
-            </p>
+    <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+      <div className="max-w-7xl mx-auto">
+        <PageHeader
+          title="Notifications"
+          subtitle={loading ? "Loading..." : `${unreadCount} unread, ${items.length} total`}
+          pill="School updates"
+          action={
+            <>
+              <Link className="text-sm text-accent hover:text-accentHover transition" to="/dashboard">
+                &larr; Back to dashboard
+              </Link>
+              <Button variant="secondary" size="sm" onClick={loadNotifications} disabled={loading}>
+                Refresh
+              </Button>
+            </>
+          }
+        />
+
+        {pageError ? (
+          <div className="mb-6 rounded-control bg-danger/10 ring-1 ring-danger/30 px-4 py-3 text-sm text-danger">
+            {pageError}
           </div>
-          <Link className="text-accent hover:underline text-sm" to="/dashboard">
-            Back to dashboard
-          </Link>
-        </div>
+        ) : null}
 
-        {pageError ? <div className="mt-4 text-danger text-sm">{pageError}</div> : null}
-
-        <div className="mt-6 flex items-center justify-between">
-          <div className="text-muted text-sm">{loading ? "Please wait..." : `${items.length} item(s)`}</div>
-          <Button variant="secondary" size="sm" onClick={loadNotifications} disabled={loading}>
-            Refresh
-          </Button>
-        </div>
-
-        <div className="mt-3 space-y-3">
-          {items.length === 0 && !loading ? <div className="text-muted text-sm">No notifications yet</div> : null}
+        <div className="space-y-3 fade-up fade-up-delay-1">
+          {items.length === 0 && !loading ? (
+            <Card>
+              <div className="text-center text-muted py-8">No notifications yet.</div>
+            </Card>
+          ) : null}
 
           {items.map((n) => (
-            <Card key={n.id} className="p-4">
+            <Card key={n.id} padded={false} className="px-5 py-4">
               <div className="flex items-start justify-between gap-3">
-                <div>
-                  <div className="text-sm text-muted">{formatDateTime(n.createdAt)}</div>
-                  <div className="mt-2">{n.message}</div>
+                <div className="flex-1">
+                  <div className="text-xs text-muted">{formatDateTime(n.createdAt)}</div>
+                  <div className="mt-1.5 text-text">{n.message}</div>
                 </div>
-                <div>{n.isRead ? <Badge>Read</Badge> : <Badge variant="warning">Unread</Badge>}</div>
+                <div className="flex-none">
+                  {n.isRead ? <Badge>Read</Badge> : <Badge variant="warning">Unread</Badge>}
+                </div>
               </div>
             </Card>
           ))}

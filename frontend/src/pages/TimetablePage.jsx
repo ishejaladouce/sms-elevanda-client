@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import Button from "../components/ui/Button.jsx";
 import Card from "../components/ui/Card.jsx";
 import Table from "../components/ui/Table.jsx";
+import PageHeader from "../components/layout/PageHeader.jsx";
 import { api } from "../services/api.js";
 import { useClientContextStore } from "../store/clientContextStore.js";
 import { withStudentId } from "../utils/studentQuery.js";
@@ -47,34 +48,45 @@ export default function TimetablePage() {
   );
 
   return (
-    <div className="min-h-screen p-4 md:p-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <h1 className="font-display text-3xl">Timetable</h1>
-            <p className="text-muted mt-1">Weekly schedule</p>
+    <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+      <div className="max-w-7xl mx-auto">
+        <PageHeader
+          title="Timetable"
+          subtitle="Your weekly schedule at a glance."
+          pill="School week"
+          action={
+            <Link className="text-sm text-accent hover:text-accentHover transition" to="/dashboard">
+              &larr; Back to dashboard
+            </Link>
+          }
+        />
+
+        {pageError ? (
+          <div className="mb-6 rounded-control bg-danger/10 ring-1 ring-danger/30 px-4 py-3 text-sm text-danger">
+            {pageError}
           </div>
-          <Link className="text-accent hover:underline text-sm" to="/dashboard">
-            Back to dashboard
-          </Link>
-        </div>
+        ) : null}
 
-        {pageError ? <div className="mt-4 text-danger text-sm">{pageError}</div> : null}
-
-        <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <Card title="Today" className="lg:col-span-1">
-            <div className="text-sm text-muted">
-              {dayLabels[today]} • {todayItems.length} lesson(s)
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 fade-up fade-up-delay-1">
+          <Card className="lg:col-span-1">
+            <div className="text-xs uppercase tracking-wider font-medium text-muted">
+              Today &middot; {dayLabels[today]}
             </div>
-            <div className="mt-3 space-y-2">
+            <div className="mt-1 text-sm text-muted">
+              {todayItems.length} lesson{todayItems.length === 1 ? "" : "s"}
+            </div>
+            <div className="mt-4 space-y-2">
               {todayItems.length === 0 ? (
-                <div className="text-muted text-sm">No lessons today</div>
+                <div className="text-muted text-sm">No lessons today.</div>
               ) : (
                 todayItems.map((t) => (
-                  <div key={t.id} className="rounded-control border border-border bg-surface2 px-3 py-2">
-                    <div className="font-medium">{t.subject}</div>
-                    <div className="text-muted text-sm font-mono">
-                      {t.startTime} - {t.endTime}
+                  <div
+                    key={t.id}
+                    className="rounded-control bg-surface2/50 px-3 py-2 ring-1 ring-white/[0.04]"
+                  >
+                    <div className="font-medium text-text text-sm">{t.subject}</div>
+                    <div className="text-muted text-xs font-mono mt-0.5">
+                      {t.startTime} &mdash; {t.endTime}
                     </div>
                   </div>
                 ))
@@ -82,16 +94,16 @@ export default function TimetablePage() {
             </div>
           </Card>
 
-          <Card title="All lessons" className="lg:col-span-2">
-            <div className="flex items-center justify-between">
-              <div className="text-muted text-sm">{loading ? "Loading..." : `${items.length} lesson(s)`}</div>
+          <Card className="lg:col-span-2">
+            <div className="flex items-center justify-between mb-4">
+              <div className="text-xs uppercase tracking-wider font-medium text-muted">
+                All lessons
+              </div>
               <Button variant="secondary" size="sm" onClick={loadTimetable} disabled={loading}>
                 Refresh
               </Button>
             </div>
-            <div className="mt-3">
-              <Table columns={columns} rows={items} rowKey={(r) => r.id} />
-            </div>
+            <Table columns={columns} rows={items} rowKey={(r) => r.id} />
           </Card>
         </div>
       </div>

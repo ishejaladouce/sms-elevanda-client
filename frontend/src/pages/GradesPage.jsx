@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import Card from "../components/ui/Card.jsx";
 import Button from "../components/ui/Button.jsx";
 import Table from "../components/ui/Table.jsx";
+import PageHeader from "../components/layout/PageHeader.jsx";
 import { api } from "../services/api.js";
 import { useClientContextStore } from "../store/clientContextStore.js";
 import { withStudentId } from "../utils/studentQuery.js";
@@ -59,32 +60,46 @@ export default function GradesPage() {
   }, [visibleGrades]);
 
   return (
-    <div className="min-h-screen p-4 md:p-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <h1 className="font-display text-3xl">Grades</h1>
-            <p className="text-muted mt-1">Academic results</p>
+    <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+      <div className="max-w-7xl mx-auto">
+        <PageHeader
+          title="Grades"
+          subtitle="Every subject score, organised by term."
+          pill="Academic results"
+          action={
+            <Link className="text-sm text-accent hover:text-accentHover transition" to="/dashboard">
+              &larr; Back to dashboard
+            </Link>
+          }
+        />
+
+        {pageError ? (
+          <div className="mb-6 rounded-control bg-danger/10 ring-1 ring-danger/30 px-4 py-3 text-sm text-danger">
+            {pageError}
           </div>
-          <Link className="text-accent hover:underline text-sm" to="/dashboard">
-            Back to dashboard
-          </Link>
-        </div>
+        ) : null}
 
-        {pageError ? <div className="mt-4 text-danger text-sm">{pageError}</div> : null}
-
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card title="Average score" className="md:col-span-1">
-            <div className="text-2xl font-semibold">{loading ? "—" : avg ?? "—"}</div>
-            <div className="text-muted text-sm mt-1">Based on current filter</div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5 fade-up fade-up-delay-1">
+          <Card className="md:col-span-1">
+            <div className="text-xs uppercase tracking-wider font-medium text-muted">
+              Average score
+            </div>
+            <div className="mt-3 text-3xl sm:text-4xl font-display tracking-tight text-text tabular-nums">
+              {loading ? "—" : avg ?? "—"}
+              <span className="text-base text-muted font-sans ml-1.5">/ 100</span>
+            </div>
+            <div className="text-muted text-sm mt-2">Based on current filter.</div>
           </Card>
 
-          <Card title="Filter" className="md:col-span-2">
+          <Card className="md:col-span-2">
+            <div className="text-xs uppercase tracking-wider font-medium text-muted mb-4">
+              Filter
+            </div>
             <div className="flex flex-col sm:flex-row gap-3 sm:items-end">
               <div className="flex-1">
-                <label className="text-sm text-muted">Term</label>
+                <label className="block text-sm font-medium text-text mb-2">Term</label>
                 <select
-                  className="mt-1 w-full rounded-control border border-border bg-surface2 px-3 py-2 outline-none focus:ring-2 focus:ring-accent/40 transition duration-200 ease-smooth"
+                  className="w-full h-12 rounded-control bg-surface2/50 ring-1 ring-white/[0.06] hover:ring-white/[0.12] focus:ring-2 focus:ring-accent/50 px-4 outline-none transition-all"
                   value={term}
                   onChange={(e) => setTerm(e.target.value)}
                 >
@@ -96,17 +111,17 @@ export default function GradesPage() {
                   ))}
                 </select>
               </div>
-              <Button variant="secondary" onClick={loadGrades} disabled={loading}>
+              <Button variant="secondary" size="lg" onClick={loadGrades} disabled={loading}>
                 Refresh
               </Button>
             </div>
           </Card>
         </div>
 
-        <div className="mt-6">
+        <div className="mt-8 fade-up fade-up-delay-2">
           <Table columns={columns} rows={visibleGrades} rowKey={(r) => r.id} />
           {!loading ? (
-            <div className="text-muted text-sm mt-2">
+            <div className="text-muted text-sm mt-3">
               Showing {visibleGrades.length} record(s)
             </div>
           ) : null}

@@ -9,6 +9,8 @@ import Button from "../components/ui/Button.jsx";
 import Input from "../components/ui/Input.jsx";
 import Badge from "../components/ui/Badge.jsx";
 import Table from "../components/ui/Table.jsx";
+import PageHeader from "../components/layout/PageHeader.jsx";
+import { useCountUp } from "../hooks/useCountUp.js";
 import { api } from "../services/api.js";
 import { useClientContextStore } from "../store/clientContextStore.js";
 import { withStudentId } from "../utils/studentQuery.js";
@@ -114,32 +116,52 @@ export default function FeesPage() {
   }
 
   const lowBalance = balance < 5000;
+  const animatedBalance = useCountUp(Number(balance) || 0, { duration: 1200 });
 
   return (
-    <div className="min-h-screen p-4 md:p-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <h1 className="font-display text-3xl">Fees</h1>
-            <p className="text-muted mt-1">Balance and payment history</p>
+    <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+      <div className="max-w-7xl mx-auto">
+        <PageHeader
+          title="Fees"
+          subtitle="Track your balance, deposit funds, or request a refund."
+          pill="School fees, simplified"
+          action={
+            <Link className="text-sm text-accent hover:text-accentHover transition" to="/dashboard">
+              &larr; Back to dashboard
+            </Link>
+          }
+        />
+
+        {pageError ? (
+          <div className="mb-6 rounded-control bg-danger/10 ring-1 ring-danger/30 px-4 py-3 text-sm text-danger">
+            {pageError}
           </div>
-          <Link className="text-accent hover:underline text-sm" to="/dashboard">
-            Back to dashboard
-          </Link>
-        </div>
+        ) : null}
 
-        {pageError ? <div className="mt-4 text-danger text-sm">{pageError}</div> : null}
-
-        <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <Card title="Current balance" className="lg:col-span-1">
-            <div className="text-2xl font-semibold">{loading ? "—" : `${balance} RWF`}</div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 fade-up fade-up-delay-1">
+          <Card className="lg:col-span-1">
+            <div className="text-xs uppercase tracking-wider font-medium text-muted">
+              Current balance
+            </div>
+            <div className="mt-3 text-3xl sm:text-4xl font-display tracking-tight text-text tabular-nums">
+              {loading ? "—" : animatedBalance.toLocaleString()}
+              <span className="text-base text-muted font-sans ml-1.5">RWF</span>
+            </div>
             {lowBalance && !loading ? (
-              <div className="mt-2 text-danger text-sm">Low balance alert (below 5000 RWF)</div>
+              <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-danger/10 px-2.5 py-1 text-xs text-danger ring-1 ring-danger/20">
+                <span className="h-1.5 w-1.5 rounded-full bg-danger" />
+                Low balance (under 5,000 RWF)
+              </div>
+            ) : !loading ? (
+              <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-success/10 px-2.5 py-1 text-xs text-success ring-1 ring-success/20">
+                <span className="h-1.5 w-1.5 rounded-full bg-success" />
+                On track
+              </div>
             ) : null}
           </Card>
 
           <Card title="Deposit" className="lg:col-span-1">
-            <form onSubmit={depositForm.handleSubmit(submitDeposit)} className="space-y-3">
+            <form onSubmit={depositForm.handleSubmit(submitDeposit)} className="space-y-4">
               <Input
                 label="Amount (RWF)"
                 inputMode="numeric"
@@ -157,7 +179,7 @@ export default function FeesPage() {
           </Card>
 
           <Card title="Withdraw" className="lg:col-span-1">
-            <form onSubmit={withdrawForm.handleSubmit(submitWithdraw)} className="space-y-3">
+            <form onSubmit={withdrawForm.handleSubmit(submitWithdraw)} className="space-y-4">
               <Input
                 label="Amount (RWF)"
                 inputMode="numeric"
@@ -175,17 +197,18 @@ export default function FeesPage() {
           </Card>
         </div>
 
-        <div className="mt-6">
-          <div className="flex items-center justify-between">
-            <h2 className="font-display text-xl">History</h2>
+        <div className="mt-8 fade-up fade-up-delay-2">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="font-display text-xl text-text">Transaction history</h2>
+              <p className="text-sm text-muted mt-1">All deposits and refund requests.</p>
+            </div>
             <Button variant="secondary" size="sm" onClick={loadFees} disabled={loading}>
               Refresh
             </Button>
           </div>
 
-          <div className="mt-3">
-            <Table columns={columns} rows={history} rowKey={(r) => r.id} />
-          </div>
+          <Table columns={columns} rows={history} rowKey={(r) => r.id} />
         </div>
       </div>
     </div>
