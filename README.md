@@ -93,6 +93,13 @@ cd backend
 node scripts/verify-user.cjs you@example.com
 ```
 
+If you also got **"Device mismatch"**, update the deviceId to match what the login page shows:
+
+```bash
+cd backend
+node scripts/set-device.cjs you@example.com <deviceIdFromLoginPage>
+```
+
 ## Folder structure
 
 - `frontend/` — React web app
