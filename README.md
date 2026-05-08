@@ -40,7 +40,8 @@ npm run dev
 ```
 
 Backend runs on: `http://localhost:5000`  
-Swagger docs: `http://localhost:5000/api/docs`
+**API documentation (Swagger UI):** `http://localhost:5000/api/docs`  
+**OpenAPI JSON** (import into Postman or other tools): `http://localhost:5000/api/openapi.json`
 
 ### 2) Frontend
 

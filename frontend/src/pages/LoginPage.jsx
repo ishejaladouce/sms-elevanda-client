@@ -1,11 +1,10 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Button from "../components/ui/Button.jsx";
 import Input from "../components/ui/Input.jsx";
 import ThemeToggle from "../components/ui/ThemeToggle.jsx";
-import { useCountUp } from "../hooks/useCountUp.js";
 import { api } from "../services/api.js";
 import { deviceId } from "../utils/device.js";
 
@@ -46,6 +45,8 @@ function handleTileMouseMove(e) {
 
 export default function LoginPage() {
   const nav = useNavigate();
+  const location = useLocation();
+  const flashNotice = location.state?.notice;
   const form = useForm({
     resolver: zodResolver(schema),
     defaultValues: { email: "", password: "" },
@@ -112,12 +113,28 @@ export default function LoginPage() {
               calm and beautiful place.
             </p>
 
-            {/* Bento product preview */}
+            {/* Feature highlights — what every parent and student gets */}
             <div className="fade-up fade-up-delay-3 mt-10 grid grid-cols-2 gap-3 sm:gap-4 max-w-xl">
-              <FeeBalanceTile />
-              <GradeTile />
-              <AttendanceTile />
-              <LessonsTile />
+              <FeatureTile
+                icon={<CoinsIcon />}
+                title="Fees, simplified"
+                body="Deposit, withdraw and always know your balance — without queues or paperwork."
+              />
+              <FeatureTile
+                icon={<ChartIcon />}
+                title="Grades you can trust"
+                body="Every score, every term, every subject — straight from the teacher's hand."
+              />
+              <FeatureTile
+                icon={<CalendarIcon />}
+                title="Daily attendance"
+                body="See present, late and absent days at a glance — no more guesswork."
+              />
+              <FeatureTile
+                icon={<ClockIcon />}
+                title="Today's lessons"
+                body="The week's timetable in your pocket. Never miss what's coming up."
+              />
             </div>
           </aside>
 
@@ -135,6 +152,13 @@ export default function LoginPage() {
                     Sign in to continue to your portal.
                   </p>
                 </div>
+
+                {flashNotice ? (
+                  <div className="mt-5 rounded-control bg-success/10 ring-1 ring-success/30 px-4 py-3 text-success text-sm flex items-start gap-2">
+                    <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-success flex-none" />
+                    <span>{flashNotice}</span>
+                  </div>
+                ) : null}
 
                 <form
                   onSubmit={form.handleSubmit(onSubmit)}
@@ -208,153 +232,59 @@ export default function LoginPage() {
 }
 
 /* ============================================================
-   BENTO TILES — mini product previews
+   FEATURE TILES — value props shown on the marketing side
    ============================================================ */
 
-function FeeBalanceTile() {
-  const value = useCountUp(42500, { duration: 1500, delay: 600 });
-  const heights = [40, 65, 50, 80, 70, 92];
-
+function FeatureTile({ icon, title, body }) {
   return (
     <div onMouseMove={handleTileMouseMove} className="tile p-5">
-      <div className="flex items-center justify-between">
-        <span className="text-[10px] uppercase tracking-wider font-medium text-muted">
-          Fee balance
-        </span>
-        <span className="inline-flex items-center gap-1 rounded-full bg-success/15 px-2 py-0.5 text-[10px] text-success ring-1 ring-success/25">
-          <span className="h-1 w-1 rounded-full bg-success" />
-          On track
-        </span>
+      <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-accent/15 ring-1 ring-accent/25 text-accent">
+        {icon}
+      </span>
+      <div className="mt-4 font-display text-lg sm:text-xl tracking-tight text-text">
+        {title}
       </div>
-      <div className="mt-3 font-display text-2xl sm:text-3xl tracking-tight tabular-nums">
-        {value.toLocaleString()}
-        <span className="text-sm sm:text-base text-muted font-sans ml-1">RWF</span>
-      </div>
-      <div className="mt-1 text-xs text-muted">Last payment 2 days ago</div>
-      <div className="mt-4 flex items-end gap-1.5 h-10 sm:h-12">
-        {heights.map((h, i) => (
-          <div
-            key={i}
-            style={{ "--h": h / 100, height: "100%" }}
-            className={[
-              "flex-1 rounded-full bar-grow",
-              i === heights.length - 1 ? "bg-accent" : "bg-borderStrong",
-            ].join(" ")}
-          />
-        ))}
-      </div>
+      <p className="mt-1.5 text-xs sm:text-sm text-muted leading-relaxed">
+        {body}
+      </p>
     </div>
   );
 }
 
-function GradeTile() {
+function CoinsIcon() {
   return (
-    <div onMouseMove={handleTileMouseMove} className="tile p-5">
-      <div className="flex items-center justify-between">
-        <span className="text-[10px] uppercase tracking-wider font-medium text-muted">
-          Latest grade
-        </span>
-        <span className="inline-flex items-center gap-1 rounded-full bg-accent/15 px-2 py-0.5 text-[10px] text-accent ring-1 ring-accent/30">
-          <span className="h-1 w-1 rounded-full bg-accent" />
-          New
-        </span>
-      </div>
-      <div className="mt-3 font-display text-2xl sm:text-3xl tracking-tight">Math</div>
-      <div className="mt-1 text-xs text-muted">Term 2 &middot; Mid-term</div>
-      <div className="mt-4 flex items-end justify-between">
-        <div className="font-display text-xl sm:text-2xl tabular-nums">
-          <span className="text-accent">87</span>
-          <span className="text-muted text-sm sm:text-base font-sans">/100</span>
-        </div>
-        <span className="text-success text-xs font-medium">+5 pts</span>
-      </div>
-    </div>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+      <ellipse cx="12" cy="6" rx="8" ry="3" />
+      <path d="M4 6v6c0 1.66 3.58 3 8 3s8-1.34 8-3V6" />
+      <path d="M4 12v6c0 1.66 3.58 3 8 3s8-1.34 8-3v-6" />
+    </svg>
   );
 }
 
-function AttendanceTile() {
-  const radius = 24;
-  const circ = 2 * Math.PI * radius;
-  const percent = 96;
-  const offset = circ - (percent / 100) * circ;
-
+function ChartIcon() {
   return (
-    <div onMouseMove={handleTileMouseMove} className="tile p-5">
-      <div className="flex items-center justify-between">
-        <span className="text-[10px] uppercase tracking-wider font-medium text-muted">
-          Attendance
-        </span>
-        <span className="inline-flex items-center gap-1 rounded-full bg-success/15 px-2 py-0.5 text-[10px] text-success ring-1 ring-success/25">
-          <span className="h-1 w-1 rounded-full bg-success" />
-          Strong
-        </span>
-      </div>
-      <div className="mt-4 flex items-center gap-3 sm:gap-4">
-        <svg width="64" height="64" viewBox="0 0 64 64" className="-rotate-90 flex-none">
-          <circle cx="32" cy="32" r={radius} stroke="currentColor" className="text-borderStrong" strokeWidth="6" fill="none" />
-          <circle
-            cx="32"
-            cy="32"
-            r={radius}
-            stroke="currentColor"
-            className="text-accent ring-anim"
-            strokeWidth="6"
-            strokeLinecap="round"
-            fill="none"
-            strokeDasharray={circ}
-            style={{
-              strokeDashoffset: offset,
-              "--circ": circ,
-              "--off": offset,
-            }}
-          />
-        </svg>
-        <div>
-          <div className="font-display text-2xl sm:text-3xl tracking-tight tabular-nums">
-            {percent}<span className="text-muted text-sm sm:text-base font-sans">%</span>
-          </div>
-          <div className="mt-0.5 text-xs text-muted">This term</div>
-        </div>
-      </div>
-    </div>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 3v18h18" />
+      <path d="m7 14 4-4 4 4 5-6" />
+    </svg>
   );
 }
 
-function LessonsTile() {
-  const lessons = [
-    { time: "08:00", subject: "Mathematics", active: true },
-    { time: "09:30", subject: "English" },
-    { time: "11:00", subject: "Science" },
-  ];
+function CalendarIcon() {
   return (
-    <div onMouseMove={handleTileMouseMove} className="tile p-5">
-      <div className="flex items-center justify-between">
-        <span className="text-[10px] uppercase tracking-wider font-medium text-muted">
-          Today's lessons
-        </span>
-        <span className="text-[10px] text-muted font-medium">3 left</span>
-      </div>
-      <div className="mt-3 space-y-1.5">
-        {lessons.map((l) => (
-          <div
-            key={l.time}
-            className={[
-              "flex items-center gap-2.5 rounded-lg px-2.5 py-1.5",
-              l.active ? "bg-accent/10 ring-1 ring-accent/30" : "",
-            ].join(" ")}
-          >
-            <span className={["text-[11px] font-mono", l.active ? "text-accent" : "text-muted"].join(" ")}>
-              {l.time}
-            </span>
-            <span className={["text-xs sm:text-sm font-medium", l.active ? "text-text" : "text-muted"].join(" ")}>
-              {l.subject}
-            </span>
-            {l.active ? (
-              <span className="ml-auto status-dot h-1.5 w-1.5 rounded-full bg-accent" />
-            ) : null}
-          </div>
-        ))}
-      </div>
-    </div>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="4" width="18" height="18" rx="2" />
+      <path d="M16 2v4M8 2v4M3 10h18" />
+      <path d="m8 14 2 2 4-4" />
+    </svg>
+  );
+}
+
+function ClockIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 2" />
+    </svg>
   );
 }

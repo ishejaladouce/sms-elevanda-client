@@ -66,7 +66,13 @@ export default function RegisterPage() {
     try {
       form.clearErrors("root");
       await api.post("/api/auth/register", { ...values, deviceId: deviceId() });
-      nav("/login");
+      nav("/login", {
+        replace: true,
+        state: {
+          notice:
+            "Account created. Your school admin will verify this device. Then you can sign in here.",
+        },
+      });
     } catch (err) {
       const message =
         err?.response?.data?.message || "Registration failed. Please try again.";
