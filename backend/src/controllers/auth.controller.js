@@ -11,13 +11,13 @@ export const registerSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
   role: z.enum([ROLES.STUDENT, ROLES.PARENT]),
-  deviceId: z.string().min(3),
+  deviceId: z.string().min(3).transform((s) => s.trim()),
 });
 
 export const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
-  deviceId: z.string().min(3),
+  deviceId: z.string().min(3).transform((s) => s.trim()),
 });
 
 export const register = asyncHandler(async (req, res) => {

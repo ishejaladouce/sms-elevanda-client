@@ -53,7 +53,9 @@ export async function loginUser({ email, password, deviceId }) {
     throw err;
   }
 
-  if (user.deviceId !== deviceId) {
+  const stored = (user.deviceId ?? "").trim();
+  const incoming = (deviceId ?? "").trim();
+  if (stored !== incoming) {
     const err = new Error("Device mismatch. Contact admin.");
     err.status = 403;
     throw err;
